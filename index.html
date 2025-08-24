@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wire Log - Tandem Health Care Project Lucknow</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
+
+        :root {
+            --bg-color: #1A202C;
+            --surface-color: #2D3748;
+            --primary-text: #E2E8F0;
+            --secondary-text: #A0AEC0;
+            --accent-color: #4299E1;
+            --accent-hover: #2B6CB0;
+            --danger-color: #E53E3E;
+            --success-color: #38A169;
+            --border-color: #4A5568;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--primary-text);
+        }
+
+        .main-container { padding: 20px; max-width: 1200px; margin: auto; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .header-title { font-size: 1.8em; font-weight: 700; color: var(--primary-text); }
+        .nav { display: flex; gap: 10px; }
+        .nav-button {
+            background-color: var(--surface-color);
+            color: var(--primary-text);
+            border: 2px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .nav-button.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .card {
+            background-color: var(--surface-color);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 25px;
+            border: 1px solid var(--border-color);
+        }
+        .card-header { padding: 20px; border-bottom: 1px solid var(--border-color); }
+        .card-header h2 { margin: 0; font-size: 1.2em; }
+        .card-content { padding: 20px; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { font-size: 0.8em; text-transform: uppercase; color: var(--secondary-text); }
+        tbody tr:last-child td { border-bottom: none; }
+        .bundle-tag {
+            background-color: var(--bg-color);
+            color: var(--secondary-text);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+        .btn-edit, .btn-delete {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            color: var(--secondary-text);
+            transition: color 0.2s;
+        }
+        .btn-edit:hover { color: var(--accent-color); }
+        .btn-delete:hover { color: var(--danger-color); }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background-color: var(--accent-color);
+            color: white;
+            border-radius: 50%;
+            border: none;
+            font-size: 2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 20px rgba(66, 153, 225, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+        .fab:hover { transform: scale(1.1); background-color: var(--accent-hover); }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 37, 64, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: var(--surface-color);
+            color: var(--primary-text);
+            padding: 30px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            animation: slide-up 0.4s ease-out;
+            border: 1px solid var(--border-color);
+        }
+        @keyframes slide-up { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h2 { margin: 0; }
+        .close-button { font-size: 1.5em; background: none; border: none; cursor: pointer; color: var(--secondary-text); }
+
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; font-weight: 500; }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            color: var(--primary-text);
+            border-radius: 8px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+        button {
+            font-size: 1em;
+            font-weight: 600;
+            padding: 14px 22px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        .btn-primary { background-color: var(--accent-color); }
+        .btn-danger { background-color: var(--danger-color); }
+
+        #bundles-view { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <header class="header">
+            <div class="header-title">Tandem Wire Tracker</div>
+            <nav class="nav">
+                <button class="nav-button active" data-view="activity">Activity</button>
+                <button class="nav-button" data-view="bundles">Bundles</button>
+            </nav>
+        </header>
+
+        <main id="view-container">
+            <div id="activity-view">
+                <div class="card">
+                    <div class="card-header"><h2>Recent Activity</h2></div>
+                    <div style="overflow-x:auto;">
+                        <table>
+                            <thead><tr><th>Bundle</th><th>Description</th><th>Used</th><th>Actions</th></tr></thead>
+                            <tbody id="recent-activity-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="bundles-view">
+                <div class="card">
+                    <div class="card-header"><h2>Manage Bundles</h2></div>
+                    <div class="card-content" id="bundle-list-container"></div>
+                    <div class="card-content" style="border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 15px;">
+                        <button class="btn-primary" id="add-bundle-btn">Add New Bundle</button>
+                        <button class="btn-danger" id="delete-selected-bundles-btn">Delete Selected</button>
+                    </div>
+                     <div class="card-content" style="border-top: 1px solid var(--border-color);">
+                        <button id="download-pdf-btn" style="background: var(--primary-text);">Download Consolidated PDF Report</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <button class="fab" id="fab-add-log">+</button>
+
+    <!-- MODALS -->
+    <div id="log-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="log-modal-title">Add Log Entry</h2>
+                <button class="close-button">&times;</button>
+            </div>
+            <div class="input-group">
+                <label for="log-bundle-select">Select Bundle</label>
+                <select id="log-bundle-select"></select>
+            </div>
+            <div class="input-group"><label for="description">Work Description</label><input type="text" id="description"></div>
+            <div class="input-group"><label for="location">Location</label><input type="text" id="location"></div>
+            <div class="input-group"><label for="workerNames">Worker Name(s)</label><input type="text" id="workerNames"></div>
+            <div class="input-group"><label for="lengthUsed">Length Used (m)</label><input type="number" id="lengthUsed"></div>
+            <button class="btn-primary" id="save-log-btn">Save Entry</button>
+        </div>
+    </div>
+
+    <div id="bundle-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Bundle</h2>
+                <button class="close-button">&times;</button>
+            </div>
+            <div class="input-group"><label for="newBundleCode">New Bundle Code</label><input type="text" id="newBundleCode"></div>
+            <div class="input-group"><label for="newBundleLength">Initial Length (m)</label><input type="number" id="newBundleLength" value="305"></div>
+            <div class="input-group"><label for="newBundleImageUrl">Image URL (Optional)</label><input type="text" id="newBundleImageUrl"></div>
+            <button class="btn-primary" id="save-bundle-btn">Create Bundle</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyDihTA7dIg9N-WcDUiiCJhG29PEzxAyCeM",
+          authDomain: "tandem-wiretracker.firebaseapp.com",
+          databaseURL: "https://tandem-wiretracker-default-rtdb.firebaseio.com",
+          projectId: "tandem-wiretracker",
+          storageBucket: "tandem-wiretracker.appspot.com",
+          messagingSenderId: "333460010302",
+          appId: "1:333460010302:web:405159af1cb9609311a86f",
+          measurementId: "G-RWWR4QBZDE"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // All JavaScript functions from the previous working version are included below.
+        // The fix for the '+' button is in the openLogModal function.
+        let allBundlesData = {};
+        let editingLog = null;
+        const views = { activity: document.getElementById('activity-view'), bundles: document.getElementById('bundles-view') };
+        const navButtons = document.querySelectorAll('.nav-button');
+        const recentActivityTable = document.getElementById('recent-activity-table');
+        const bundleListContainer = document.getElementById('bundle-list-container');
+        const logModal = document.getElementById('log-modal');
+        const bundleModal = document.getElementById('bundle-modal');
+
+        db.collection("bundles").orderBy("id").onSnapshot(snapshot => {
+            allBundlesData = {};
+            snapshot.forEach(doc => { allBundlesData[doc.id] = { id: doc.id, ...doc.data() }; });
+            renderAll();
+        }, error => {
+            console.error("Firebase connection error: ", error);
+            recentActivityTable.innerHTML = `<tr><td colspan="4" style="color:red;">Error connecting to database.</td></tr>`;
+        });
+
+        function renderAll() { renderRecentActivity(); renderBundleManagement(); }
+
+        function renderRecentActivity() {
+            let allLogs = [];
+            for (const bundleId in allBundlesData) {
+                if (allBundlesData[bundleId].logs) {
+                    allBundlesData[bundleId].logs.forEach(log => allLogs.push({ ...log, bundleId }));
+                }
+            }
+            allLogs.sort((a, b) => b.logId - a.logId);
+            
+            recentActivityTable.innerHTML = '';
+            if (allLogs.length === 0) {
+                recentActivityTable.innerHTML = `<tr><td colspan="4">No activity yet. Click the '+' button to add a log.</td></tr>`;
+                return;
+            }
+            allLogs.slice(0, 50).forEach(log => {
+                const row = recentActivityTable.insertRow();
+                row.innerHTML = `
+                    <td><span class="bundle-tag">${log.bundleId}</span></td>
+                    <td>${log.description || ''}</td>
+                    <td>${log.used.toFixed(2)} m</td>
+                    <td>
+                        <button class="btn-edit" onclick="openLogModal('${log.bundleId}', ${log.logId})"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/></svg></button>
+                        <button class="btn-delete" onclick="deleteLog('${log.bundleId}', ${log.logId})"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg></button>
+                    </td>`;
+            });
+        }
+        
+        function renderBundleManagement() {
+            bundleListContainer.innerHTML = '';
+            const bundleCodes = Object.keys(allBundlesData);
+            if (bundleCodes.length === 0) {
+                 bundleListContainer.innerHTML = `<p>No bundles created yet. Click 'Add New Bundle' to start.</p>`;
+                 return;
+            }
+            bundleCodes.forEach(code => {
+                const bundle = allBundlesData[code];
+                const div = document.createElement('div');
+                div.innerHTML = `<div style="display: flex; align-items: center; padding: 10px 0;">
+                    <input type="checkbox" data-code="${code}" class="bundle-checkbox" style="width: 20px; height: 20px; margin-right: 15px;">
+                    <div>
+                        <strong style="font-size: 1.1em;">${code}</strong><br>
+                        <small style="color: var(--secondary-text);">Remaining: ${bundle.remainingLength.toFixed(2)}m of ${bundle.initialLength}m</small>
+                    </div></div>`;
+                bundleListContainer.appendChild(div);
+            });
+        }
+        
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                navButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                Object.values(views).forEach(view => view.style.display = 'none');
+                views[button.dataset.view].style.display = 'block';
+            });
+        });
+
+        function openModal(modal) { modal.style.display = 'flex'; }
+        function closeModal(modal) { modal.style.display = 'none'; }
+        
+        document.getElementById('fab-add-log').addEventListener('click', () => openLogModal());
+        document.getElementById('add-bundle-btn').addEventListener('click', () => openModal(bundleModal));
+        
+        [logModal, bundleModal].forEach(modal => {
+            modal.querySelector('.close-button').addEventListener('click', () => closeModal(modal));
+        });
+
+        function openLogModal(bundleId = null, logId = null) {
+            const title = document.getElementById('log-modal-title');
+            const select = document.getElementById('log-bundle-select');
+            
+            select.innerHTML = '';
+            Object.keys(allBundlesData).forEach(code => {
+                const option = document.createElement('option');
+                option.value = code; option.textContent = code;
+                select.appendChild(option);
+            });
+
+            if (bundleId && logId) { // Editing existing log
+                editingLog = { bundleId, logId };
+                const log = allBundlesData[bundleId].logs.find(l => l.logId === logId);
+                title.textContent = 'Edit Log Entry';
+                select.value = bundleId;
+                document.getElementById('description').value = log.description;
+                document.getElementById('location').value = log.location;
+                document.getElementById('workerNames').value = log.worker;
+                document.getElementById('lengthUsed').value = log.used;
+            } else { // Adding new log
+                editingLog = null;
+                title.textContent = 'Add Log Entry';
+                // *** THE FIX IS HERE ***
+                document.getElementById('description').value = '';
+                document.getElementById('location').value = '';
+                document.getElementById('workerNames').value = '';
+                document.getElementById('lengthUsed').value = '';
+                if(select.options.length > 0) select.selectedIndex = 0;
+            }
+            openModal(logModal);
+            document.getElementById('description').focus();
+        }
+
+        document.getElementById('save-log-btn').addEventListener('click', async () => {
+            const bundleId = document.getElementById('log-bundle-select').value;
+            const lengthUsed = parseFloat(document.getElementById('lengthUsed').value);
+            if (!bundleId || isNaN(lengthUsed)) return alert("Please select a bundle and enter a valid length.");
+
+            if (editingLog) {
+                const bundle = allBundlesData[editingLog.bundleId];
+                const logs = [...bundle.logs];
+                const logIndex = logs.findIndex(l => l.logId === editingLog.logId);
+                logs[logIndex] = { ...logs[logIndex], description: document.getElementById('description').value, location: document.getElementById('location').value, worker: document.getElementById('workerNames').value, used: lengthUsed };
+                const { updatedLogs, finalRemaining } = recalculateBundle(bundle.initialLength, logs);
+                await db.collection("bundles").doc(editingLog.bundleId).update({ logs: updatedLogs, remainingLength: finalRemaining });
+            } else {
+                const bundle = allBundlesData[bundleId];
+                if (lengthUsed > bundle.remainingLength) return alert('Error: Length used exceeds remaining wire length.');
+                const logEntry = { logId: Date.now(), description: document.getElementById('description').value, location: document.getElementById('location').value, worker: document.getElementById('workerNames').value, used: lengthUsed, remainingAfter: bundle.remainingLength - lengthUsed };
+                await db.collection("bundles").doc(bundleId).update({ logs: firebase.firestore.FieldValue.arrayUnion(logEntry), remainingLength: firebase.firestore.FieldValue.increment(-lengthUsed) });
+            }
+            closeModal(logModal);
+        });
+
+        document.getElementById('save-bundle-btn').addEventListener('click', async () => {
+            const code = document.getElementById('newBundleCode').value.trim();
+            const initialLength = parseFloat(document.getElementById('newBundleLength').value);
+            if (!code || isNaN(initialLength) || initialLength <= 0) return alert('Please enter a valid code and initial length.');
+            if (allBundlesData[code]) return alert('This bundle code already exists.');
+            
+            await db.collection("bundles").doc(code).set({ id: code, initialLength, remainingLength: initialLength, imageUrl: document.getElementById('newBundleImageUrl').value.trim(), logs: [] });
+            closeModal(bundleModal);
+        });
+        
+        const recalculateBundle = (initialLength, logs) => {
+            let remaining = initialLength;
+            const sortedLogs = logs.sort((a, b) => a.logId - b.logId);
+            sortedLogs.forEach(log => { remaining -= log.used; log.remainingAfter = remaining; });
+            return { updatedLogs: sortedLogs, finalRemaining: remaining };
+        };
+
+        window.deleteLog = async (bundleId, logId) => {
+            if (!confirm('Are you sure you want to delete this log entry?')) return;
+            const bundle = allBundlesData[bundleId];
+            const logs = bundle.logs.filter(l => l.logId !== logId);
+            const { updatedLogs, finalRemaining } = recalculateBundle(bundle.initialLength, logs);
+            await db.collection("bundles").doc(bundleId).update({ logs: updatedLogs, remainingLength: finalRemaining });
+        };
+
+        document.getElementById('delete-selected-bundles-btn').addEventListener('click', async () => {
+             const checkboxes = document.querySelectorAll('.bundle-checkbox:checked');
+            if (checkboxes.length === 0) return alert('Please select bundles to delete.');
+            if (!confirm(`Are you sure you want to delete ${checkboxes.length} selected bundle(s)?`)) return;
+
+            const batch = db.batch();
+            checkboxes.forEach(cb => { batch.delete(db.collection('bundles').doc(cb.dataset.code)); });
+            await batch.commit();
+        });
+
+        document.getElementById('download-pdf-btn').addEventListener('click', async () => {
+            const selectedBundles = Array.from(document.querySelectorAll('.bundle-checkbox:checked')).map(cb => allBundlesData[cb.dataset.code]);
+            if (selectedBundles.length === 0) return alert('Please select at least one bundle for the report.');
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'pt', 'a4');
+            const companyLogoUrl = 'https://static.wixstatic.com/media/926517_9dd20481e214429e8535fc21edf492f6~mv2.jpg';
+            const generatedDate = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+
+            try {
+                const response = await fetch(`https://corsproxy.io/?${encodeURIComponent(companyLogoUrl)}`);
+                const blob = await response.blob();
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onloadend = () => {
+                    const logoBase64 = reader.result;
+                    const addHeaderFooter = () => {
+                        const pageCount = doc.internal.getNumberOfPages();
+                        for (let i = 1; i <= pageCount; i++) {
+                            doc.setPage(i);
+                            doc.addImage(logoBase64, 'JPEG', 40, 40, 98, 26);
+                            doc.setFontSize(22); doc.setTextColor('#0A2540');
+                            doc.text("Consolidated Wire Report", doc.internal.pageSize.getWidth() - 40, 65, { align: 'right' });
+                            doc.setDrawColor('#E6EBF1'); doc.line(40, 85, doc.internal.pageSize.getWidth() - 40, 85);
+                            doc.setFontSize(9); doc.setTextColor(150);
+                            doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() - 30, { align: 'center' });
+                            doc.text(`Tandem Health Care | Generated on: ${generatedDate}`, 40, doc.internal.pageSize.getHeight() - 30);
+                        }
+                    };
+                    
+                    addHeaderFooter();
+                    let startY = 120;
+                    selectedBundles.forEach(bundle => {
+                        doc.setFontSize(16); doc.setTextColor('#0A2540');
+                        doc.text(`Bundle Code: ${bundle.id}`, 40, startY);
+                        doc.setFontSize(11); doc.setTextColor('#525F7F');
+                        doc.text(`Initial: ${bundle.initialLength.toFixed(2)}m | Remaining: ${bundle.remainingLength.toFixed(2)}m`, 40, startY + 18);
+                        const tableColumn = ["Description", "Location", "Worker", "Used (m)", "Remaining (m)"];
+                        const tableRows = (bundle.logs || []).sort((a,b) => b.logId - a.logId).map(log => [log.description, log.location, log.worker, log.used.toFixed(2), log.remainingAfter.toFixed(2)]);
+                        doc.autoTable({
+                            head: [tableColumn], body: tableRows, startY: startY + 30, theme: 'grid',
+                            headStyles: { fillColor: '#1A202C' }, styles: { font: 'Nunito' }
+                        });
+                        startY = doc.autoTable.previous.finalY + 30;
+                    });
+                    
+                    addHeaderFooter(); // Re-apply to all pages after tables are drawn
+                    doc.save(`Tandem-Consolidated-Report.pdf`);
+                };
+            } catch(e) { console.error("PDF generation failed:", e); }
+        });
+    </script>
+</body>
+</html>
